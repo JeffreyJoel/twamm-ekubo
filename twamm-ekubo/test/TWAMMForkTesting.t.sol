@@ -56,33 +56,63 @@ contract L1TWAMMBridgeTest is Test {
         vm.deal(user, 1000 ether);
     }
 
+    // function testDepositWithMessage() public {
+    //     uint128 amount = 100 ether;
+
+    //     vm.startPrank(user);
+    //     token.approve(address(bridge), amount);
+
+    //     //uint256 expectedNonce = starknetBridge.mockNonce();
+
+    //     //vm.expectEmit(true, true, false, true);
+    //     // Update the event emission expectation
+    //     //emit DepositAndCreateOrder(user, l2EndpointAddress, amount, expectedNonce);
+
+    //     bridge.depositAndCreateOrder{value: 0.01 ether}(
+    //         amount, l2EndpointAddress, start, end, address(token), address(token), fee
+    //     );
+    //     vm.stopPrank();
+
+    //     MockStarknetTokenBridge.DepositParams memory params = starknetBridge.getLastDepositParams();
+
+    //     //assert that the amount is correct
+    //     assertEq(params.token, address(token), "Incorrect token");
+    //     assertEq(params.amount, amount, "Incorrect amount");
+
+    //     //Check payload
+    //     assertEq(params.message.length, 8, "Incorrect payload length");
+    //     assertEq(params.message[0], uint256(uint160(l2EkuboAddress)), "Incorrect Ekubo address");
+    //     assertEq(params.l2EndpointAddress, l2EndpointAddress, "Incorrect sender address");
+    // }
+
+
     function testDepositWithMessage() public {
         uint128 amount = 100 ether;
 
         vm.startPrank(user);
         token.approve(address(bridge), amount);
 
-        //uint256 expectedNonce = starknetBridge.mockNonce();
+        uint256 expectedNonce = starknetBridge.mockNonce();
 
-        //vm.expectEmit(true, true, false, true);
-        // Update the event emission expectation
-        //emit DepositAndCreateOrder(user, l2EndpointAddress, amount, expectedNonce);
+        vm.expectEmit(true, true, false, true);
+        emit DepositAndCreateOrder(user, l2EndpointAddress, amount, expectedNonce);
 
         bridge.depositAndCreateOrder{value: 0.01 ether}(
             amount, l2EndpointAddress, start, end, address(token), address(token), fee
         );
         vm.stopPrank();
 
-        //MockStarknetTokenBridge.DepositParams memory params = starknetBridge.getLastDepositParams();
+        MockStarknetTokenBridge.DepositParams memory params = starknetBridge.getLastDepositParams();
 
-        ///assert that the amount is correct
-        // assertEq(params.token, address(token), "Incorrect token");
-        // assertEq(params.amount, amount, "Incorrect amount");
+        console.log("Expected Ekubo address:", uint256(uint160(l2EkuboAddress)));
+        console.log("Actual message[0]:", params.message[0]);
 
-        // //Check payload
-        // assertEq(params.message.length, 8, "Incorrect payload length");
+        // Assertions remain the same
+        assertEq(params.token, address(token), "Incorrect token");
+        assertEq(params.amount, amount, "Incorrect amount");
+        assertEq(params.message.length, 8, "Incorrect payload length");
         // assertEq(params.message[0], uint256(uint160(l2EkuboAddress)), "Incorrect Ekubo address");
-        // assertEq(params.l2EndpointAddress, l2EndpointAddress, "Incorrect sender address");
+        assertEq(params.l2EndpointAddress, l2EndpointAddress, "Incorrect sender address");
     }
 
     function testInitiateWithdrawal() public {
