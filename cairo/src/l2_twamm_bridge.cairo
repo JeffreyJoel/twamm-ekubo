@@ -98,8 +98,7 @@ fn on_receive(
                        let token_bridge = ITokenBridgeDispatcher { 
                            contract_address: self.token_bridge_address.read()
                        };      
-
-                    let l1_token = EthAddress { address: 0x6B175474E89094C44Da98b954EedeAC495271d0F };    
+                       let l1_token: EthAddress = 0x6B175474E89094C44Da98b954EedeAC495271d0F_felt252.try_into().unwrap();
                     let u256_amount_sold = u256 { low: amount_sold, high: 0 };          
                     token_bridge.initiate_token_withdraw(l1_token, l1_recipient, u256_amount_sold);
                        false
