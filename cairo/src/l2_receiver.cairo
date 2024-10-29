@@ -26,9 +26,17 @@ mod Receive_Counter{
     }
     
     #[external(v0)]
-    pub fn update_count(ref self: ContractState){
-        let current_count = self.count.read();
-        self.count.write(current_count + 1);
-        self.emit(CountUpdated { new_count: current_count + 1 });
+    pub fn update_count(ref self: ContractState, message: Array<felt252>){
+
+        let message_str = message[0];
+        if(message.len() > 0){
+            let current_count = self.count.read();
+            self.count.write(current_count + 1);
+            self.emit(CountUpdated { new_count: current_count + 1 });
+            println!("{}: Message received", message_str);
+        }
+        else{
+           println!("No message");
+        }
     }
 }
