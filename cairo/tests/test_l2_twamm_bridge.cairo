@@ -51,7 +51,6 @@ fn deploy_token(
 }
 
 
-
 fn setup() -> PoolKey {
     let token_class = declare("TestToken").unwrap().contract_class();
     let owner = get_contract_address();
@@ -82,8 +81,6 @@ struct Message {
     id: u64,
     sale_rate_delta: u128,
 }
-
-#[cfg(test)]
 
 #[test]
 #[fork("mainnet")]
