@@ -5,17 +5,18 @@ edition = "2023_11"
 
 [dependencies]
 ekubo = { git = "https://github.com/ekuboprotocol/abis" }
-starknet = ">=2.6.2"
+starknet = ">=2.8.0"
 
 
 [[tool.snforge.fork]]
 name = "mainnet"
 url = "https://free-rpc.nethermind.io/mainnet-juno"
+# block_id.tag = "latest"
 block_id.number = "677957"
 
 [dev-dependencies]
-snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.24.0" }
-assert_macros = "2.8.2"
+snforge_std = "0.32.0"
+assert_macros = "2.8.4"
 
 [[target.starknet-contract]]
 sierra = true

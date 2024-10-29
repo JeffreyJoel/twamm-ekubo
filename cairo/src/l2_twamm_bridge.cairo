@@ -36,7 +36,7 @@ pub trait IL2TWAMMBridge<TContractState> {
 
 
 #[starknet::contract]
-mod L2TWAMMBridge {
+pub mod L2TWAMMBridge {
     use ekubo::interfaces::positions::{IPositionsDispatcher, IPositionsDispatcherTrait};
     use ekubo::extensions::interfaces::twamm::{OrderKey};
     use starknet::{ContractAddress, get_contract_address};

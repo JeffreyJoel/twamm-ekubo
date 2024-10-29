@@ -4,7 +4,7 @@ use starknet::{
 };
 use array::ArrayTrait;
 use snforge_std::{
-    declare, DeclareResultTrait, ContractClassTrait, cheat_block_timestamp, CheatSpan, ContractClass
+    declare, DeclareResult,  ContractClassTrait, cheat_block_timestamp, CheatSpan, ContractClass
 };
 use core::result::ResultTrait;
 use twammbridge::l2_twamm_bridge::L2TWAMMBridge;
@@ -51,6 +51,7 @@ fn deploy_token(
 }
 
 
+
 fn setup() -> PoolKey {
     let token_class = declare("TestToken").unwrap().contract_class();
     let owner = get_contract_address();
@@ -81,6 +82,8 @@ struct Message {
     id: u64,
     sale_rate_delta: u128,
 }
+
+#[cfg(test)]
 
 #[test]
 #[fork("mainnet")]
@@ -132,7 +135,6 @@ fn test_mint_and_increase_sell_amount() {
         new_sell_amount > 10000, true, "New sell amount should be greater than original amount"
     );
 }
-
 #[test]
 #[fork("mainnet")]
 fn test_on_receive() {
