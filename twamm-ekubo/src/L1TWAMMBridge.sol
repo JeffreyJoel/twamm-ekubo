@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "
+// import "
 
 interface IStarknetTokenBridge {
     function depositWithMessage(address token, uint256 amount, uint256 l2Recipient, uint256[] calldata message)
@@ -122,10 +122,11 @@ contract L1TWAMMBridge is Ownable {
         }
 
         token.transferFrom(msg.sender, address(this), amount);
-        token.approve(address(starknetBridge), 0);
+        // token.approve(address(starknetBridge), 0);
         token.approve(address(starknetBridge), amount);
 
         uint256[] memory payload = _encodeDepositPayload(msg.sender, sellToken, buyToken, fee, start, end, amount);
+        uint256[] memory emptyPayload = new uint256[](0);
         starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, emptyPayload);
     
         emit DepositAndCreateOrder(msg.sender, l2EndpointAddress, amount, 1);
@@ -151,7 +152,7 @@ contract L1TWAMMBridge is Ownable {
     ) external payable onlyOwner {
         if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
 
-        uint256[] memory payload = _encodeWithdrawalPayload(sellToken, l1Recipient, amount);
+        uint256[] memory payload = _encodeWithdrawalPayload(sellToken, l1Recipient, amount, 0);
         starknetBridge.depositWithMessage{value: msg.value}(address(token), 0, l2EndpointAddress, payload);
 
         emit WithdrawalInitiated(l1Recipient, amount);
