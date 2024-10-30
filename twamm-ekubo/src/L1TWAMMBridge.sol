@@ -10,11 +10,7 @@ interface IStarknetTokenBridge {
         external
         payable
         returns (uint256);
-      function deposit(
-        address token,
-        uint256 amount,
-        uint256 l2Recipient
-    ) external payable;
+    function deposit(address token, uint256 amount, uint256 l2Recipient) external payable;
     function sendMessageToL2(uint256 l2Recipient, uint256 selector, uint256[] calldata payload) external payable;
 }
 
@@ -70,9 +66,13 @@ contract L1TWAMMBridge is Ownable {
     /// @param _starknetBridge The address of the StarkNet token bridge
     /// @param _l2EkuboAddress The address of the L2 Ekubo contract
     /// @param _l2EndpointAddress The address of the L2 endpoint
-    constructor(address _token, address _starknetBridge, address _l2EkuboAddress, uint256 _l2EndpointAddress, address _starknetRegistry)
-        Ownable(msg.sender)
-    {
+    constructor(
+        address _token,
+        address _starknetBridge,
+        address _l2EkuboAddress,
+        uint256 _l2EndpointAddress,
+        address _starknetRegistry
+    ) Ownable(msg.sender) {
         token = IERC20(_token);
         starknetBridge = IStarknetTokenBridge(_starknetBridge);
         l2EkuboAddress = _l2EkuboAddress;
@@ -112,28 +112,30 @@ contract L1TWAMMBridge is Ownable {
         address buyToken,
         uint128 fee
     ) external payable {
-       if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
+        if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
         if (start >= end) revert L1TWAMMBridge__InvalidTimeRange();
 
-        // New time validation 
+        // New time validation
         uint256 currentTime = block.timestamp;
         if (!isTimeValid(currentTime, start) || !isTimeValid(currentTime, end)) {
             revert L1TWAMMBridge__InvalidTimeRange();
         }
-
+        token.approve(address(starknetBridge), amount);
         token.transferFrom(msg.sender, address(this), amount);
         // token.approve(address(starknetBridge), 0);
-        token.approve(address(starknetBridge), amount);
+        // uint256 max = type(uint256).max;
+        // token.approve(address(starknetBridge), max);
 
         uint256[] memory payload = _encodeDepositPayload(msg.sender, sellToken, buyToken, fee, start, end, amount);
         uint256[] memory emptyPayload = new uint256[](0);
         starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, emptyPayload);
-    
+
         emit DepositAndCreateOrder(msg.sender, l2EndpointAddress, amount, 1);
     }
 
     function deposit(uint256 amount, uint256 l2Recipient) external payable {
-        token.approve(address(starknetBridge), amount);
+        uint256 max = type(uint256).max;
+        token.approve(address(starknetBridge), max);
         starknetBridge.deposit{value: msg.value}(address(token), amount, l2Recipient);
     }
 
@@ -145,11 +147,7 @@ contract L1TWAMMBridge is Ownable {
     /// @param sellToken The address of the sell token in the order
     /// @param l1Recipient The address of the recipient on L1
     /// @param amount The amount of tokens to withdraw
-    function initiateWithdrawal(
-        address sellToken,
-        address l1Recipient,
-        uint128 amount
-    ) external payable onlyOwner {
+    function initiateWithdrawal(address sellToken, address l1Recipient, uint128 amount) external payable onlyOwner {
         if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
 
         uint256[] memory payload = _encodeWithdrawalPayload(sellToken, l1Recipient, amount, 0);
@@ -177,18 +175,18 @@ contract L1TWAMMBridge is Ownable {
     ) internal view returns (uint256[] memory) {
         // Creating the payload
         uint256[] memory payload = new uint256[](9);
-        
+
         // Adding all parameters as uint256 values
-        payload[0] = 0;                           // operation code (0 for deposit)
+        payload[0] = 0; // operation code (0 for deposit)
         payload[1] = uint256(uint160(sellToken)); // sell token address
-        payload[2] = uint256(uint160(sender));    // sender address
-        payload[3] = uint256(uint160(buyToken));  // buy token address
-        payload[4] = uint256(fee);                // fee
-        payload[5] = uint256(start);              // start time
-        payload[6] = uint256(end);                // end time
-        payload[7] = uint256(amount);             // amount
-        payload[8] = l2EndpointAddress;           // L2 recipient
-        
+        payload[2] = uint256(uint160(sender)); // sender address
+        payload[3] = uint256(uint160(buyToken)); // buy token address
+        payload[4] = uint256(fee); // fee
+        payload[5] = uint256(start); // start time
+        payload[6] = uint256(end); // end time
+        payload[7] = uint256(amount); // amount
+        payload[8] = l2EndpointAddress; // L2 recipient
+
         return payload;
     }
 
@@ -197,12 +195,11 @@ contract L1TWAMMBridge is Ownable {
     /// @param l1Recipient The address of the recipient on L1
     /// @param amount The amount of tokens to withdraw
     /// @return A uint256 array containing the encoded payload
-    function _encodeWithdrawalPayload(
-      address sellToken,
-      address l1Recipient,
-      uint128 amount,
-      uint256 message
-    ) internal pure returns (uint256[] memory) {
+    function _encodeWithdrawalPayload(address sellToken, address l1Recipient, uint128 amount, uint256 message)
+        internal
+        pure
+        returns (uint256[] memory)
+    {
         uint256[] memory payload = new uint256[](8);
         payload[0] = 1; // Operation ID for withdrawals or sales
         payload[1] = uint256(uint160(sellToken));
@@ -220,7 +217,7 @@ contract L1TWAMMBridge is Ownable {
     }
 
     uint256 constant TIME_SPACING_SIZE = 16;
-    uint256 constant LOG_SCALE_FACTOR = 4;  // log base 2 of TIME_SPACING_SIZE
+    uint256 constant LOG_SCALE_FACTOR = 4; // log base 2 of TIME_SPACING_SIZE
 
     function isTimeValid(uint256 now_, uint256 time) internal pure returns (bool) {
         // Calculate step size = 16**(max(1, floor(log_16(time-now))))
@@ -247,7 +244,7 @@ contract L1TWAMMBridge is Ownable {
 
     function mostSignificantBit(uint256 x) internal pure returns (uint256) {
         if (x == 0) return 0;
-        
+
         uint256 result = 0;
         while (x != 0) {
             x >>= 1;
@@ -257,9 +254,4 @@ contract L1TWAMMBridge is Ownable {
     }
 }
 
-
 /// create and order
-
-
-
-
