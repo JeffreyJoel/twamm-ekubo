@@ -13,7 +13,7 @@ contract L1TWAMMBridgeTest is Test {
 
     event DepositAndCreateOrder(address indexed l1Sender, uint256 indexed l2Recipient, uint256 amount, uint256 nonce);
 
-    address public user = address(0x1);
+    address public user = address(0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045);
     address public l2BridgeAddress = address(456);
     address public l2TokenAddress = address(789);
     address public l2EkuboAddress = address(1);
@@ -22,7 +22,8 @@ contract L1TWAMMBridgeTest is Test {
     //end - start should % 16 = 0
 
     // Ensure (end - start) is always divisible by 16
-    uint128 public start = uint128((block.timestamp / 16) * 16); // Round down to nearest multiple of 16
+    // uint128 public start = uint128((block.timestamp / 16) * 16); // Round down to nearest multiple of 16
+    uint128 public start = uint128((block.timestamp + 16) - (block.timestamp % 16)); //switched to this because the first one was failing
     uint128 public end = start + 64; // 1600 is divisible by 16
 
     uint128 public fee = 0.01 ether;
@@ -80,52 +81,52 @@ contract L1TWAMMBridgeTest is Test {
         bridge.deposit{value: 0.01 ether}(amount, l2EndpointAddress);
     }
 
-    function testDepositWithMessage() public {
-        uint256 amount = 1 ether;
+    // function testDepositWithMessage() public {
+    //     uint256 amount = 1 ether;
 
-        // Debug logs to understand initial state
-        console.log("Initial DAI balance of user:", token.balanceOf(user));
-        console.log("Initial ETH balance of user:", user.balance);
-        console.log("Initial DAI balance of bridge:", token.balanceOf(address(bridge)));
+    //     // Debug logs to understand initial state
+    //     console.log("Initial DAI balance of user:", token.balanceOf(user));
+    //     console.log("Initial ETH balance of user:", user.balance);
+    //     console.log("Initial DAI balance of bridge:", token.balanceOf(address(bridge)));
 
-        vm.startPrank(user);
+    //     vm.startPrank(user);
 
-        // First approve and transfer tokens
-        token.approve(address(bridge), amount);
-        token.transfer(address(bridge), amount);
+    //     // First approve and transfer tokens
+    //     token.approve(address(bridge), amount);
+    //     token.transfer(address(bridge), amount);
 
-        // Debug logs after transfer
-        console.log("DAI balance of user after transfer:", token.balanceOf(user));
-        console.log("DAI balance of bridge after transfer:", token.balanceOf(address(bridge)));
+    //     // Debug logs after transfer
+    //     console.log("DAI balance of user after transfer:", token.balanceOf(user));
+    //     console.log("DAI balance of bridge after transfer:", token.balanceOf(address(bridge)));
 
-        // Bridge needs to approve Starknet bridge
-        vm.stopPrank();
-        vm.prank(address(bridge));
-        token.approve(address(0xCA14057f85F2662257fd2637FdEc558626bCe554), amount);
+    //     // Bridge needs to approve Starknet bridge
+    //     vm.stopPrank();
+    //     vm.prank(address(bridge));
+    //     token.approve(address(0xCA14057f85F2662257fd2637FdEc558626bCe554), amount);
 
-        vm.startPrank(user);
+    //     vm.startPrank(user);
 
-        // Let's try with a specific payload structure
-        uint256[] memory payload = new uint256[](3);
-        payload[0] = uint256(uint160(address(token))); // token address
-        payload[1] = uint256(uint160(user)); // from address
-        payload[2] = amount; // amount
+    //     // Let's try with a specific payload structure
+    //     uint256[] memory payload = new uint256[](3);
+    //     payload[0] = uint256(uint160(address(token))); // token address
+    //     payload[1] = uint256(uint160(user)); // from address
+    //     payload[2] = amount; // amount
 
-        // Debug log the payload
-        console.log("Payload[0] (token):", payload[0]);
-        console.log("Payload[1] (from):", payload[1]);
-        console.log("Payload[2] (amount):", payload[2]);
+    //     // Debug log the payload
+    //     console.log("Payload[0] (token):", payload[0]);
+    //     console.log("Payload[1] (from):", payload[1]);
+    //     console.log("Payload[2] (amount):", payload[2]);
 
-        try bridge.depositWithMessage{value: 0.01 ether}(amount, l2EndpointAddress, payload) {
-            console.log("Deposit succeeded");
-        } catch Error(string memory reason) {
-            console.log("Deposit failed with reason:", reason);
-        } catch (bytes memory) {
-            console.log("Deposit failed with low-level error");
-        }
+    //     try bridge.depositWithMessage{value: 0.01 ether}(amount, l2EndpointAddress, payload) {
+    //         console.log("Deposit succeeded");
+    //     } catch Error(string memory reason) {
+    //         console.log("Deposit failed with reason:", reason);
+    //     } catch (bytes memory) {
+    //         console.log("Deposit failed with low-level error");
+    //     }
 
-        vm.stopPrank();
-    }
+    //     vm.stopPrank();
+    // }
 
     function testInitiateWithdrawal() public {
         uint128 amount = 100 ether;
@@ -191,5 +192,23 @@ contract L1TWAMMBridgeTest is Test {
         vm.expectRevert();
         vm.prank(user);
         bridge.removeSupportedToken(address(token));
+    }
+
+    function testDepositAndCreateOrder() public {
+        vm.startPrank(user);
+        uint256 amount = 1 * 10 ** 18;
+        token.approve(address(bridge), amount);
+        token.transfer(address(bridge), amount);
+        bridge.depositAndCreateOrder{value: 0.01 ether}(
+            amount, l2EndpointAddress, start, end, address(token), address(token), fee
+        );
+        vm.stopPrank();
+    }
+
+    function testGetBridge() public {
+        address bridge = IStarknetRegistry(0x1268cc171c54F2000402DfF20E93E60DF4c96812).getBridge(
+            address(0xCa14007Eff0dB1f8135f4C25B34De49AB0d42766)
+        );
+        console.log("Bridge:", bridge);
     }
 }

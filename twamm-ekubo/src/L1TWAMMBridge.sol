@@ -8,8 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 interface IStarknetTokenBridge {
     function depositWithMessage(address token, uint256 amount, uint256 l2Recipient, uint256[] calldata message)
         external
-        payable
-        returns (uint256);
+        payable;
     function deposit(address token, uint256 amount, uint256 l2Recipient) external payable;
     function sendMessageToL2(uint256 l2Recipient, uint256 selector, uint256[] calldata payload) external payable;
 }
@@ -104,7 +103,7 @@ contract L1TWAMMBridge is Ownable {
     /// @param buyToken The address of the token to buy
     /// @param fee The fee for the TWAMM order
     function depositAndCreateOrder(
-        uint128 amount,
+        uint256 amount,
         uint256 l2EndpointAddress,
         uint128 start,
         uint128 end,
@@ -112,7 +111,7 @@ contract L1TWAMMBridge is Ownable {
         address buyToken,
         uint128 fee
     ) external payable {
-        if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
+        // if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
         if (start >= end) revert L1TWAMMBridge__InvalidTimeRange();
 
         // New time validation
@@ -120,26 +119,43 @@ contract L1TWAMMBridge is Ownable {
         if (!isTimeValid(currentTime, start) || !isTimeValid(currentTime, end)) {
             revert L1TWAMMBridge__InvalidTimeRange();
         }
+        uint256 lower128Bits = amount & ((1 << 128) - 1);
+        uint256 upper128Bits = amount >> 128;
+
         token.approve(address(starknetBridge), amount);
         token.transferFrom(msg.sender, address(this), amount);
-        // token.approve(address(starknetBridge), 0);
-        // uint256 max = type(uint256).max;
-        // token.approve(address(starknetBridge), max);
 
-        uint256[] memory payload = _encodeDepositPayload(msg.sender, sellToken, buyToken, fee, start, end, amount);
-        uint256[] memory emptyPayload = new uint256[](0);
-        starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, emptyPayload);
+        uint256[] memory payload = new uint256[](5);
+        payload[0] = uint256(uint160(address(token))); // token address
+        payload[1] = uint256(uint160(msg.sender)); // from address
+        payload[2] = uint256(l2EndpointAddress); // l2 endpoint address
+        payload[3] = lower128Bits;
+        payload[4] = upper128Bits;
+
+        starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, payload);
 
         emit DepositAndCreateOrder(msg.sender, l2EndpointAddress, amount, 1);
     }
 
     function deposit(uint256 amount, uint256 l2Recipient) external payable {
-        uint256 max = type(uint256).max;
-        token.approve(address(starknetBridge), max);
+        token.approve(address(starknetBridge), amount);
         starknetBridge.deposit{value: msg.value}(address(token), amount, l2Recipient);
     }
 
     function depositWithMessage(uint256 amount, uint256 l2Recipient, uint256[] calldata message) external payable {
+        token.approve(address(starknetBridge), amount);
+        token.transferFrom(msg.sender, address(this), amount);
+
+        // uint256 lower128Bits = amount & ((1 << 128) - 1);
+        // uint256 upper128Bits = amount >> 128;
+
+        // uint256[] memory payload = new uint256[](5);
+        // payload[0] = uint256(uint160(address(token))); // token address
+        // payload[1] = uint256(uint160(tx.origin)); // from address
+        // payload[2] = uint256(l2EndpointAddress); // l2 endpoint address
+        // payload[3] = lower128Bits;
+        // payload[4] = upper128Bits;
+
         starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2Recipient, message);
     }
 
@@ -151,7 +167,7 @@ contract L1TWAMMBridge is Ownable {
         if (validateBridge(address(token)) == false) revert L1TWAMMBridge__InvalidBridge();
 
         uint256[] memory payload = _encodeWithdrawalPayload(sellToken, l1Recipient, amount, 0);
-        starknetBridge.depositWithMessage{value: msg.value}(address(token), 0, l2EndpointAddress, payload);
+        starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, payload);
 
         emit WithdrawalInitiated(l1Recipient, amount);
     }

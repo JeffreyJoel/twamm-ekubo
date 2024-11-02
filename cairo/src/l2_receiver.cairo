@@ -4,17 +4,17 @@ use starknet::storage::{
     StoragePathEntry, StorageMapWriteAccess
 };
 use starknet::EthAddress;
+// use array::SpanTrait;
 
 #[starknet::interface]
-pub trait IL2TWAMMBridge<TContractState> {
+trait IMsgReceiver<TContractState> {
     fn on_receive(
-        ref self: TContractState,
+        self: @TContractState,
         l2_token: ContractAddress,
-        amount: u128,
+        amount: u256,
         depositor: EthAddress,
         message: Span<felt252>
     ) -> bool;
-
 }
 
 
@@ -51,19 +51,18 @@ pub mod ReceiveCounter {
         id: u64,
         sale_rate_delta: u128,
     }
-
-    #[external(v0)]
+    
     #[abi(embed_v0)]
-    impl L2TWAMMBridge of super::IL2TWAMMBridge<ContractState> {
+    impl L2TWAMMBridge of super::IMsgReceiver<ContractState> {
         fn on_receive(
-            ref self: ContractState,
+            self: @ContractState,
             l2_token: ContractAddress,
-            amount: u128,
+            amount: u256,
             depositor: EthAddress,
             message: Span<felt252>
         ) -> bool {
-            let current_count = self.count.read();
-            self.count.write(current_count + 1);
+            // let mut current_count = self.count.read();
+            // self.count.write(current_count + 1);
             true
         }
     }

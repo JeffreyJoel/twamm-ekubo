@@ -1,0 +1,37 @@
+{
+  "transactions": [
+    {
+      "hash": "0x91e171d2c1fb278be74c30eae76668a4099cfa2a60bb87576ba1d6232843708f",
+      "transactionType": "CALL",
+      "contractName": "FiatTokenProxy",
+      "contractAddress": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+      "function": "approve(address,uint256)",
+      "arguments": [
+        "0xcE5485Cfb26914C5dcE00B9BAF0580364daFC7a4",
+        "500000"
+      ],
+      "transaction": {
+        "type": "0x02",
+        "from": "0xddb342ecc94236c29a5307d3757d0724d759453c",
+        "to": "0x1c7d4b196cb0c7b01d743fbc6116a902379c7238",
+        "gas": "0x12b1b",
+        "value": "0x0",
+        "data": "0x095ea7b3000000000000000000000000ce5485cfb26914c5dce00b9baf0580364dafc7a4000000000000000000000000000000000000000000000000000000000007a120",
+        "nonce": "0x16e",
+        "accessList": []
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
+    }
+  ],
+  "receipts": [],
+  "libraries": [],
+  "pending": [
+    "0x91e171d2c1fb278be74c30eae76668a4099cfa2a60bb87576ba1d6232843708f"
+  ],
+  "returns": {},
+  "timestamp": 1730552395,
+  "chain": 11155111,
+  "multi": false,
+  "commit": "5c94acc"
+}
