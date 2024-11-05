@@ -11,7 +11,7 @@ use ekubo::extensions::interfaces::twamm::{OrderKey, OrderInfo};
 #[starknet::interface]
 trait IMsgReceiver<TContractState> {
     fn on_receive(
-        self: @TContractState,
+        ref self: TContractState,
         l2_token: ContractAddress,
         amount: u256,
         depositor: EthAddress,
@@ -70,24 +70,20 @@ pub mod ReceiveCounter {
     #[abi(embed_v0)]
     impl L2TWAMMBridge of super::IMsgReceiver<ContractState> {
         fn on_receive(
-            self: @ContractState,
-            l2_token: ContractAddress,
-            amount: u256,
-            depositor: EthAddress,
-            message: Span<felt252>
+        ref self: ContractState,
+        l2_token: ContractAddress,
+        amount: u256,
+        depositor: EthAddress,
+        message: Span<felt252>
         ) -> bool {
             let mut message_span = message;
             // let mut current_count = self.count.read();
             // let lower_amount_bits: u128 = (amount & 0xffffffffffffffffffffffffffffffff_u256).try_into().unwrap();
             let first_element = *message[0];
-        
-
-            if first_element != 0 {     
-                return false;
+            if first_element == 0 {     
+                let mut current_count = self.count.read();
+                self.count.write(current_count + 1);
             }
-            let mut current_count = self.count.read();
-            self.count.write(current_count + 1);
-
             true
         }
     }
