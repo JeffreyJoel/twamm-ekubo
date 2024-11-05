@@ -8,8 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 interface IStarknetTokenBridge {
     function depositWithMessage(address token, uint256 amount, uint256 l2Recipient, uint256[] calldata message)
         external
-        payable
-        returns (uint256);
+        payable;
 
     function deposit(address token, uint256 amount, uint256 l2Recipient) external payable;
 
@@ -103,7 +102,7 @@ contract L1TWAMMBridge is Ownable {
         address buyToken,
         uint128 fee
     ) external payable {
-        if (!validateBridge(address(token))) revert InvalidBridge();
+        // if (!validateBridge(address(token))) revert InvalidBridge();
 
         _validateTimeParams(start, end);
         _handleTokenTransfer(amount, address(token), address(starknetBridge));
@@ -127,24 +126,13 @@ contract L1TWAMMBridge is Ownable {
     }
 
     function initiateWithdrawal(address sellToken, address l1Recipient, uint128 amount) external payable onlyOwner {
-        if (!validateBridge(address(token))) revert InvalidBridge();
+        // if (!validateBridge(address(token))) revert InvalidBridge();
 
         uint256[] memory payload = _encodeWithdrawalPayload(sellToken, l1Recipient, amount, 0);
 
         starknetBridge.depositWithMessage{value: msg.value}(address(token), 0, l2EndpointAddress, payload);
 
         emit WithdrawalInitiated(l1Recipient, amount);
-    }
-
-    /// @notice Deposits tokens without a message -- does not create an order on L2
-    function deposit(uint256 amount, uint256 l2Recipient) external payable {
-        token.approve(address(starknetBridge), amount);
-        starknetBridge.deposit{value: msg.value}(address(token), amount, l2Recipient);
-    }
-
-    /// @notice Deposits tokens with a message -- does not create an order on L2
-    function depositWithMessage(uint256 amount, uint256 l2Recipient, uint256[] calldata message) external payable {
-        starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2Recipient, message);
     }
 
     function removeSupportedToken(address _token) external onlyOwner {

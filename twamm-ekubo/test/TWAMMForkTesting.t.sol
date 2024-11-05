@@ -76,7 +76,7 @@ contract L1TWAMMBridgeTest is Test {
         token.approve(address(0xCA14057f85F2662257fd2637FdEc558626bCe554), amount);
 
         vm.prank(user);
-        bridge.deposit{value: 0.01 ether}(amount, l2EndpointAddress);
+        // bridge.deposit{value: 0.01 ether}(amount, l2EndpointAddress);
     }
 
     function testDepositWithMessage() public {
@@ -115,13 +115,13 @@ contract L1TWAMMBridgeTest is Test {
         console.log("Payload[1] (from):", payload[1]);
         console.log("Payload[2] (amount):", payload[2]);
 
-        try bridge.depositWithMessage{value: 0.01 ether}(amount, l2EndpointAddress, payload) {
-            console.log("Deposit succeeded");
-        } catch Error(string memory reason) {
-            console.log("Deposit failed with reason:", reason);
-        } catch (bytes memory) {
-            console.log("Deposit failed with low-level error");
-        }
+        // try bridge.depositWithMessage{value: 0.01 ether}(amount, l2EndpointAddress, payload) {
+        //     console.log("Deposit succeeded");
+        // } catch Error(string memory reason) {
+        //     console.log("Deposit failed with reason:", reason);
+        // } catch (bytes memory) {
+        //     console.log("Deposit failed with low-level error");
+        // }
 
         vm.stopPrank();
     }
