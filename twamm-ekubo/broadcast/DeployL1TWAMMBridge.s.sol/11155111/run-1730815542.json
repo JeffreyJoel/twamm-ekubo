@@ -26,49 +26,18 @@
       "isFixedGasLimit": false
     }
   ],
-  "receipts": [
-    {
-      "transactionHash": "0xee2c2a67944734c76f5f4f7b0306d1fef1764729dad3e3d4a4b26e832ab8d893",
-      "transactionIndex": "0x13",
-      "blockHash": "0xb660b549967badc616567ccc1a4712791d4114a338aaaf7bc962d7719a14be08",
-      "blockNumber": "0x6b1358",
-      "from": "0xDdb342ecc94236c29a5307d3757d0724D759453C",
-      "to": null,
-      "cumulativeGasUsed": "0x79365a",
-      "gasUsed": "0xff746",
-      "contractAddress": "0xF5453106CAa7a15baB2aF51e761326118Cacf8c0",
-      "logs": [
-        {
-          "address": "0xF5453106CAa7a15baB2aF51e761326118Cacf8c0",
-          "topics": [
-            "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "0x000000000000000000000000ddb342ecc94236c29a5307d3757d0724d759453c"
-          ],
-          "data": "0x",
-          "blockHash": "0xb660b549967badc616567ccc1a4712791d4114a338aaaf7bc962d7719a14be08",
-          "blockNumber": "0x6b1358",
-          "transactionHash": "0xee2c2a67944734c76f5f4f7b0306d1fef1764729dad3e3d4a4b26e832ab8d893",
-          "transactionIndex": "0x13",
-          "logIndex": "0x6c",
-          "removed": false
-        }
-      ],
-      "status": "0x1",
-      "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000001000000000000000000000000001400000000020000000000000000000800400000000000000000000000400000400000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000000",
-      "type": "0x2",
-      "effectiveGasPrice": "0x2d99bfb19"
-    }
-  ],
+  "receipts": [],
   "libraries": [],
-  "pending": [],
+  "pending": [
+    "0xee2c2a67944734c76f5f4f7b0306d1fef1764729dad3e3d4a4b26e832ab8d893"
+  ],
   "returns": {
     "0": {
       "internal_type": "contract L1TWAMMBridge",
       "value": "0xF5453106CAa7a15baB2aF51e761326118Cacf8c0"
     }
   },
-  "timestamp": 1730815556,
+  "timestamp": 1730815542,
   "chain": 11155111,
   "multi": false,
   "commit": "fc4ed57"

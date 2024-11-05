@@ -28,7 +28,7 @@ pub trait IL2TWAMMBridge<TContractState> {
     fn on_receive(
         ref self: TContractState,
         l2_token: ContractAddress,
-        amount: u128,
+        amount: u256,
         depositor: EthAddress,
         message: Span<felt252>
     ) -> bool;
@@ -99,17 +99,17 @@ mod L2TWAMMBridge {
         fn on_receive(
             ref self: ContractState,
             l2_token: ContractAddress,
-            amount: u128,
+            amount: u256,
             depositor: EthAddress,
             message: Span<felt252>
         ) -> bool {
             let mut message_span = message;
-
+            let lower_amount_bits: u128 = (amount & 0xffffffffffffffffffffffffffffffff_u256).try_into().unwrap();
             match Serde::<Message>::deserialize(ref message_span) {
                 Option::Some(message) => {
                     match message.operation_type {
-                        0 => self.execute_deposit(depositor, amount, message),
-                        _ => self.execute_withdrawal(depositor, amount, message)
+                        0 => self.execute_deposit(depositor, lower_amount_bits, message),
+                        _ => self.execute_withdrawal(depositor, lower_amount_bits, message)
                     }
                 },
                 Option::None => false
