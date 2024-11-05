@@ -28,14 +28,14 @@ contract L1TWAMMBridgeInteraction is Script {
     address token = address(0xCa14007Eff0dB1f8135f4C25B34De49AB0d42766);
     IStarknetTokenBridge starknetBridge = IStarknetTokenBridge(0xcE5485Cfb26914C5dcE00B9BAF0580364daFC7a4);
     address l2EkuboAddress = address(0x123);
-    uint256 l2EndpointAddress = 0x3bbd256734abe14157da0af3a16436d046e1bf2b77bb97567b88d5d530fb7ee;
+    uint256 l2EndpointAddress = 0x1e4af2a6be9977dca8a2c46da65abb698fb09c20013b2f616bab21c6a08d79a;
     address starknetRegistry = address(0xdc1564B4E0b554b26b2CFd2635B84A0777035d11);
 
     uint128 public start = uint128((block.timestamp + 16) - (block.timestamp % 16)); //switched to this because the first one was failing
     uint128 public end = start + 64;
 
     function setUp() public {
-        bridge = L1TWAMMBridge(0x1F7F7f1F9f03ebd10169421713fC91881425AA0A);
+        bridge = L1TWAMMBridge(0xE85ad4997e408Aa58B3FC8abE9Ec7Bc21f0B0FfE);
         user = msg.sender;
     }
 

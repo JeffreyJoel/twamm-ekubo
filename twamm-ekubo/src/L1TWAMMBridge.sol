@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IStarknetTokenBridge {
     function depositWithMessage(address token, uint256 amount, uint256 l2Recipient, uint256[] calldata message)
-        external
+        external`
         payable;
     function deposit(address token, uint256 amount, uint256 l2Recipient) external payable;
     function sendMessageToL2(uint256 l2Recipient, uint256 selector, uint256[] calldata payload) external payable;
@@ -125,12 +125,12 @@ contract L1TWAMMBridge is Ownable {
         token.approve(address(starknetBridge), amount);
         token.transferFrom(msg.sender, address(this), amount);
 
-        uint256[] memory payload = new uint256[](5);
-        payload[0] = uint256(uint160(address(token))); // token address
-        payload[1] = uint256(uint160(msg.sender)); // from address
-        payload[2] = uint256(l2EndpointAddress); // l2 endpoint address
-        payload[3] = lower128Bits;
-        payload[4] = upper128Bits;
+        uint256[] memory payload = new uint256[](0);
+        // payload[0] = uint256(uint160(address(token))); // token address
+        // payload[1] = uint256(uint160(msg.sender)); // from address
+        // payload[2] = uint256(l2EndpointAddress); // l2 endpoint address
+        // payload[3] = lower128Bits;
+        // payload[4] = upper128Bits;
 
         starknetBridge.depositWithMessage{value: msg.value}(address(token), amount, l2EndpointAddress, payload);
 

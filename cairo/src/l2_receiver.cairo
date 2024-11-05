@@ -9,12 +9,13 @@ use starknet::EthAddress;
 #[starknet::interface]
 trait IMsgReceiver<TContractState> {
     fn on_receive(
-        self: @TContractState,
+        ref self: TContractState,
         l2_token: ContractAddress,
         amount: u256,
         depositor: EthAddress,
         message: Span<felt252>
     ) -> bool;
+  
 }
 
 
@@ -55,17 +56,30 @@ pub mod ReceiveCounter {
     #[abi(embed_v0)]
     impl L2TWAMMBridge of super::IMsgReceiver<ContractState> {
         fn on_receive(
-            self: @ContractState,
+            ref self: ContractState,
             l2_token: ContractAddress,
             amount: u256,
             depositor: EthAddress,
             message: Span<felt252>
         ) -> bool {
-            // let mut current_count = self.count.read();
-            // self.count.write(current_count + 1);
+            let mut current_count = self.count.read();
+            self.count.write(current_count + 1);
             true
         }
+
+
     }
+    // #[external(v0)]
+    // fn update_count(ref self: ContractState) {
+    //     // Call the on_receive function and use its return value
+    //     let received = self.on_receive(l2_token, amount, depositor, message);
+    //     if received {
+    //         let mut current_count = self.count.read();
+    //         self.count.write(current_count + 1);
+    //     }
+    // }
+    
+ 
     #[external(v0)]
     pub fn get_count(self: @ContractState) -> u32 {
         self.count.read()
